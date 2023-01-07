@@ -9,11 +9,12 @@ require('dotenv').config();
 const easyWaf = require('easy-waf');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const {stringify} = require('querystring');
 
 const rateLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 24 hrs in milliseconds
+    windowMs: 60 * 60 * 1000, // 24 hrs in milliseconds
     max: 1000,
-    message: 'You have exceeded the 100 requests in 24 hrs limit!',
+    message: 'You have exceeded the 1000 requests in 1 hrs limit!',
     standardHeaders: true,
     legacyHeaders: false,
 });
@@ -25,7 +26,7 @@ app.use(rateLimiter);
 
 app.use(easyWaf({
     dryMode: false, //Suspicious requests are only logged and not blocked
-    allowedHTTPMethods: ['GET', 'POST'],
+    allowedHTTPMethods: ['GET', 'POST','PUT','PATCH'],
     ipBlacklist: ['1.1.1.1', '2.2.2.2'],
     ipWhitelist: ['::1', '172.16.0.0/12'],
     queryUrlWhitelist: ['github.com'],
@@ -57,10 +58,10 @@ app.post('/recaptcha', async (req, res) => {
     const verifyURL = `https://google.com/recaptcha/api/siteverify?${query}`;
   
     // Make a request to verifyURL
-    const body = await fetch(verifyURL).then(res => res.json());
+    const body = await axios.get(verifyURL);
   
     // If not successful
-    if (body.success !== undefined && !body.success)
+    if (body.data.success !== undefined && !body.data.success)
       return res.json({ success: false, msg: 'Failed captcha verification' });
   
     // If successful

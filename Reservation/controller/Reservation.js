@@ -18,12 +18,12 @@ const getReservationWithDegree = async (req, res) => {
     if (!req.params.MatchNumber) {
         return res.status(400).json({ message: 'Enter a MatchNumber please!' })
     }
-    if (!req.params.Degree) {
+    if (!req.params.Category) {
         return res.status(400).json({ message: 'Enter the desired degree (1, 2, 3) please!' })
     }
     try {
         const { MatchNumber, Category } = req.params
-        const ticket = Reservation.findOne({ 'MatchNumber': MatchNumber, 'Category': Category })
+        const ticket = await Reservation.findOne({ 'MatchNumber': MatchNumber, 'Category': Category })
         res.status(200).json(ticket)
     }
     catch (e) {
@@ -68,8 +68,8 @@ const DeleteTicket = async (req, res) => {
 const buyTicket = async (req, res) => {
     try {
         var reservation = req.body.reservation
+        console.log(req.body);
         // validate payload before proceeding with reservations
-        console.log(reservation)
         const validationError = validateTicketReservationDto(reservation);
         if (validationError) {
             return res.status(403).send(validationError.message);
